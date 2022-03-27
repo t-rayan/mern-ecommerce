@@ -16,6 +16,7 @@ import {
   Th,
   Thead,
   Tr,
+  Image,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -73,13 +74,27 @@ const Products = () => {
             <Thead>
               <Tr>
                 <Th>NAME</Th>
+                <Th>REMAINING</Th>
+                <Th>PRICE</Th>
                 <Th>OPTIONS</Th>
               </Tr>
             </Thead>
             <Tbody>
               {products?.map((product) => (
                 <Tr key={product._id}>
-                  <Td>{product.name}</Td>
+                  <Td display="flex" alignItems="center" gap={2}>
+                    <Box>
+                      <Image
+                        src={product?.img}
+                        alt="pimg"
+                        boxSize="50px"
+                        borderRadius="md"
+                      />
+                    </Box>
+                    {product.name}
+                  </Td>
+                  <Td>{product.inventory}</Td>
+                  <Td>{product.price}</Td>
                   <Td>
                     <PopMenu
                       deleteFunc={() => dispatch(removeProduct(product._id))}

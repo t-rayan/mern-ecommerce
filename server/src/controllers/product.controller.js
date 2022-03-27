@@ -1,3 +1,4 @@
+import cloudinary from "../configs/cloudinary.config.js";
 import Category from "../models/category.model.js";
 import Product from "../models/product.model.js";
 import { createProductValidation } from "../utils/validation.util.js";
@@ -17,7 +18,8 @@ export const getAllProducts = async (req, res) => {
 };
 
 export const addProduct = async (req, res) => {
-  const { name, inventory, price, size, color, category, desc, img } = req.body;
+  const { name, inventory, price, size, color, category, desc } = req.body;
+  const imgFile = req.files?.pic;
 
   // validation
   const { error } = createProductValidation.validate(req.body);
@@ -30,20 +32,22 @@ export const addProduct = async (req, res) => {
     if (productExists.length > 0) {
       return res.status(400).json({ msg: "Product name already exists" });
     } else {
-      const newProduct = await Product.create({
-        name,
-        inventory,
-        price,
-        size,
-        color,
-        category,
-        desc,
-        img,
+      cloudinary.uploader.upload(imgFile.tempFilePath, async (err, result) => {
+        const newProduct = await Product.create({
+          name,
+          inventory,
+          price,
+          size,
+          color,
+          category,
+          desc,
+          img: result?.url,
+        });
+        if (newProduct) {
+          return res.status(200).json({ msg: "Product added", newProduct });
+        }
+        return res.status(400).json({ msg: "Invalid product data" });
       });
-      if (newProduct) {
-        return res.status(200).json({ msg: "Product added", newProduct });
-      }
-      return res.status(400).json({ msg: "Invalid product data" });
     }
   } catch (error) {
     return res.status(500).json({ msg: error.message });

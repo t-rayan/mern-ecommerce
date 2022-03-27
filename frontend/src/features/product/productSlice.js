@@ -29,9 +29,9 @@ export const getAllProducts = createAsyncThunk(
 // add new category
 export const addProduct = createAsyncThunk(
   "product/add",
-  async (productInfo, thunkAPI) => {
+  async (formData, thunkAPI) => {
     try {
-      return await productServices.addProductService(productInfo);
+      return await productServices.addProductService(formData);
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.msg) ||
@@ -98,7 +98,7 @@ export const productSlice = createSlice({
       state.isLoading = false;
       state.isSuccess = false;
       state.message = "";
-      state.category = null;
+      state.product = null;
       state.isEdit = false;
     },
   },
@@ -126,7 +126,7 @@ export const productSlice = createSlice({
     [addProduct.fulfilled]: (state, action) => {
       state.isLoading = false;
       state.isSuccess = true;
-      state.products = [action.payload?.category, ...state.products];
+      state.products = [action.payload?.newProduct, ...state.products];
       state.message = action.payload?.msg;
     },
     [addProduct.rejected]: (state, action) => {

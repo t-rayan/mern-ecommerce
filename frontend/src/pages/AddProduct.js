@@ -7,27 +7,45 @@ import {
   Input,
   Stack,
   Textarea,
+  Select,
 } from "@chakra-ui/react";
-import React from "react";
+import { useEffect } from "react";
 import FormLayout from "../layouts/FormLayout";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Alertbox from "../components/Alertbox";
-import { useSelector } from "react-redux";
-import { reset } from "../features/product/productSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { getProduct, reset } from "../features/product/productSlice";
+import { addProduct } from "../features/product/productSlice";
+import { getAllCategories } from "../features/category/categorySlice";
 
 const AddProduct = () => {
+  const dispatch = useDispatch();
   const { register, handleSubmit } = useForm();
-  const { id } = useParams;
-  const { isError, message, isLoading, isEdit } = useSelector(
+  const { id } = useParams();
+
+  const { isError, message, isLoading, isEdit, product } = useSelector(
     (state) => state.products
   );
+  const { categories } = useSelector((state) => state.categories);
 
-  const onSubmit = (data) => {
-    let file = data?.img[0];
-    data.img = file;
-    console.log(data);
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("inventory", data.inventory);
+    formData.append("price", data.price);
+    formData.append("size", data.size);
+    formData.append("color", data.color);
+    formData.append("desc", data.desc);
+    formData.append("category", data.category);
+    formData.append("pic", data.pic[0]);
+    dispatch(addProduct(formData));
   };
+
+  useEffect(() => {
+    dispatch(getAllCategories());
+    id && dispatch(getProduct(id));
+  }, [dispatch, id]);
 
   return (
     <FormLayout title={id ? "Edit Product" : "Add Product"}>
@@ -44,7 +62,8 @@ const AddProduct = () => {
             <FormControl>
               <FormLabel htmlFor="cat-name"> Name</FormLabel>
               <Input
-                {...register("name", { required: true })}
+                defaultValue={id ? product?.name : " "}
+                {...register("name")}
                 type="text"
                 borderColor="gray.400"
               />
@@ -53,7 +72,8 @@ const AddProduct = () => {
               <FormControl>
                 <FormLabel htmlFor="cat-name"> Inventory</FormLabel>
                 <Input
-                  {...register("inventory", { required: true })}
+                  defaultValue={id ? product?.inventory : " "}
+                  {...register("inventory")}
                   type="number"
                   borderColor="gray.400"
                 />
@@ -61,7 +81,8 @@ const AddProduct = () => {
               <FormControl>
                 <FormLabel htmlFor="cat-name"> Price</FormLabel>
                 <Input
-                  {...register("price", { required: true })}
+                  defaultValue={id ? product?.price : " "}
+                  {...register("price")}
                   type="number"
                   borderColor="gray.400"
                 />
@@ -71,7 +92,8 @@ const AddProduct = () => {
               <FormControl>
                 <FormLabel htmlFor="cat-name"> Size</FormLabel>
                 <Input
-                  {...register("size", { required: true })}
+                  defaultValue={id ? product?.size : " "}
+                  {...register("size")}
                   type="text"
                   borderColor="gray.400"
                 />
@@ -79,7 +101,8 @@ const AddProduct = () => {
               <FormControl>
                 <FormLabel htmlFor="cat-name"> Color</FormLabel>
                 <Input
-                  {...register("color", { required: true })}
+                  defaultValue={id ? product?.color : " "}
+                  {...register("color")}
                   type="text"
                   borderColor="gray.400"
                 />
@@ -87,20 +110,27 @@ const AddProduct = () => {
             </HStack>
 
             <FormControl>
+              <FormLabel htmlFor="product-cat"> Category </FormLabel>
+              <Select {...register("category")} placeholder="Select option">
+                {categories?.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
               <FormLabel htmlFor="cat-name"> Desc</FormLabel>
               <Textarea
-                {...register("desc", { required: true })}
+                defaultValue={id ? product?.desc : " "}
+                {...register("desc")}
                 type="text"
                 borderColor="gray.400"
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="cat-name"> Img</FormLabel>
-              <Input
-                {...register("img", { required: true })}
-                type="file"
-                accept=".png, .jpg, .jpeg"
-              />
+              <Input {...register("pic")} type="file" />
             </FormControl>
 
             {isError && <Alertbox msg={message} closeFunc={reset} />}

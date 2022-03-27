@@ -55,6 +55,7 @@ function App() {
           <Route path="products" element={<InnerLayout />}>
             <Route index element={<Products />} />
             <Route path="add" element={<AddProduct />} />
+            <Route path=":id" element={<AddProduct />} />
           </Route>
           {/* <Route path="products" element={<Products />} /> */}
           <Route path="orders" element={<Orders />} />
