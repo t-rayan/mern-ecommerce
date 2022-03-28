@@ -88,17 +88,20 @@ export const getProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, inventory, price, size, color, desc, img, category } = req.body;
+  const { name, inventory, price, size, color, desc, category } = req.body;
+  const imgFile = req.files?.pic;
+
   try {
     const product = await Product.findById({ _id: id });
     if (product) {
+      const result = await cloudinary.uploader.upload(imgFile.tempFilePath);
       product.name = name ? name : product.name;
       product.inventory = inventory ? inventory : product.inventory;
       product.price = price ? price : product.price;
       product.size = size ? size : product.size;
       product.color = color ? color : product.color;
       product.desc = desc ? desc : product.desc;
-      product.img = img ? img : product.img;
+      product.img = result ? result.url : product.img;
       product.category = category ? category : product.category;
       const updated = await product.save();
       return res.status(200).json({ updated, msg: "Product Updated" });

@@ -15,7 +15,11 @@ import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Alertbox from "../components/Alertbox";
 import { useSelector, useDispatch } from "react-redux";
-import { getProduct, reset } from "../features/product/productSlice";
+import {
+  getProduct,
+  reset,
+  updateProduct,
+} from "../features/product/productSlice";
 import { addProduct } from "../features/product/productSlice";
 import { getAllCategories } from "../features/category/categorySlice";
 
@@ -39,7 +43,9 @@ const AddProduct = () => {
     formData.append("desc", data.desc);
     formData.append("category", data.category);
     formData.append("pic", data.pic[0]);
-    dispatch(addProduct(formData));
+
+    !product && dispatch(addProduct(formData));
+    product && dispatch(updateProduct({ id, formData }));
   };
 
   useEffect(() => {

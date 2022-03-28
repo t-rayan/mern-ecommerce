@@ -62,7 +62,10 @@ export const updateProduct = createAsyncThunk(
   "product/update",
   async (update, thunkAPI) => {
     try {
-      return await productServices.updateProductService(update.id, update.data);
+      return await productServices.updateProductService(
+        update.id,
+        update.formData
+      );
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.msg) ||
