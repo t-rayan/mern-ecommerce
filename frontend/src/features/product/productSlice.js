@@ -61,6 +61,7 @@ export const removeProduct = createAsyncThunk(
 export const updateProduct = createAsyncThunk(
   "product/update",
   async (update, thunkAPI) => {
+    console.log(update.formData.getAll);
     try {
       return await productServices.updateProductService(
         update.id,

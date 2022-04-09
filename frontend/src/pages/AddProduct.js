@@ -9,7 +9,7 @@ import {
   Textarea,
   Select,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import FormLayout from "../layouts/FormLayout";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -24,6 +24,8 @@ import { addProduct } from "../features/product/productSlice";
 import { getAllCategories } from "../features/category/categorySlice";
 
 const AddProduct = () => {
+  const [images, setImages] = useState([]);
+  const [selected, setSelected] = useState();
   const dispatch = useDispatch();
   const { register, handleSubmit } = useForm();
   const { id } = useParams();
@@ -32,6 +34,10 @@ const AddProduct = () => {
     (state) => state.products
   );
   const { categories } = useSelector((state) => state.categories);
+
+  const onImageChanges = (e) => {
+    setImages([...images, e.target.files[0]]);
+  };
 
   const onSubmit = async (data) => {
     const formData = new FormData();
@@ -43,8 +49,13 @@ const AddProduct = () => {
     formData.append("desc", data.desc);
     formData.append("category", data.category);
     formData.append("pic", data.pic[0]);
+    if (id) {
+      for (let i = 0; i < data.imgs.length; i++) {
+        formData.append("imgs", data.imgs[i]);
+      }
+    }
 
-    !product && dispatch(addProduct(formData));
+    !id && dispatch(addProduct(formData));
     product && dispatch(updateProduct({ id, formData }));
   };
 
@@ -139,6 +150,18 @@ const AddProduct = () => {
               <Input {...register("pic")} type="file" />
             </FormControl>
 
+            {id && (
+              <>
+                <FormLabel htmlFor="cat-name"> Add more</FormLabel>
+                <Input
+                  {...register("imgs")}
+                  type="file"
+                  multiple
+                  onChange={onImageChanges}
+                />
+              </>
+            )}
+
             {isError && <Alertbox msg={message} closeFunc={reset} />}
 
             <Button
@@ -155,6 +178,8 @@ const AddProduct = () => {
             </Button>
           </Stack>
         </form>
+
+        {/* multiple images uploading form */}
       </Box>
     </FormLayout>
   );

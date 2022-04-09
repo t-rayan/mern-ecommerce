@@ -21,8 +21,15 @@ const productSchema = mongoose.Schema(
       type: String,
     },
     img: {
-      type: String,
+      img_url: String,
+      pub_id: String,
     },
+    images: [
+      {
+        img_url: String,
+        pub_id: String,
+      },
+    ],
     category: {
       ref: "Category",
       type: mongoose.Schema.Types.ObjectId,

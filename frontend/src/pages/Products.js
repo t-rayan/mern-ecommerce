@@ -85,7 +85,7 @@ const Products = () => {
                   <Td display="flex" alignItems="center" gap={2}>
                     <Box>
                       <Image
-                        src={product?.img}
+                        src={product?.img?.img_url}
                         alt="pimg"
                         boxSize="50px"
                         borderRadius="md"
