@@ -20,6 +20,7 @@ export const getAllProducts = async (req, res) => {
 export const addProduct = async (req, res) => {
   const { name, inventory, price, size, color, category, desc } = req.body;
   const imgFile = req.files?.pic;
+  const addImgs = req.files?.imgs;
 
   // validation
   const { error } = createProductValidation.validate(req.body);
@@ -35,6 +36,7 @@ export const addProduct = async (req, res) => {
       const result = await cloudinary.uploader.upload(imgFile.tempFilePath, {
         folder: "ecommerce",
       });
+      const imgUrls = await multipleImgUploader(addImgs);
       const newProduct = await Product.create({
         name,
         inventory,
@@ -44,6 +46,7 @@ export const addProduct = async (req, res) => {
         category,
         desc,
         img: { img_url: result?.url, pub_id: result?.public_id },
+        images: imgUrls,
       });
       if (newProduct) {
         return res.status(200).json({ msg: "Product added", newProduct });
@@ -108,6 +111,7 @@ export const updateProduct = async (req, res) => {
       product.size = size ? size : product.size;
       product.color = color ? color : product.color;
       product.desc = desc ? desc : product.desc;
+      // adding single image file
       if (imgFile) {
         const result = await cloudinary.uploader.upload(imgFile.tempFilePath, {
           folder: "ecommerce",
@@ -115,17 +119,8 @@ export const updateProduct = async (req, res) => {
         product.img = result ? result.url : product.img;
       }
       // adding multiple images
-      if (addImgs.length > 0) {
-        let imgUrls = [];
-        for (let i = 0; i < addImgs.length; i++) {
-          const result = await cloudinary.uploader.upload(
-            addImgs[i].tempFilePath,
-            { folder: "ecommerce" }
-          );
-          imgUrls.push({ img_url: result?.url, pub_id: result?.public_id });
-        }
-        product.images.push.apply(product.images, imgUrls);
-      }
+      const imgUrls = await multipleImgUploader(addImgs);
+      product.images.push.apply(product.images, imgUrls);
       product.category = category ? category : product.category;
       const updated = await product.save();
       return res.status(200).json({ updated, msg: "Product Updated" });
@@ -135,4 +130,23 @@ export const updateProduct = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
+};
+
+// multiple images uploader
+const multipleImgUploader = async (imgs) => {
+  let imgUrls = [];
+  if (imgs.length > 1) {
+    for (let i = 0; i < imgs.length; i++) {
+      const result = await cloudinary.uploader.upload(imgs[i].tempFilePath, {
+        folder: "ecommerce",
+      });
+      imgUrls.push({ img_url: result?.url, pub_id: result?.public_id });
+    }
+  } else if (imgs !== undefined) {
+    const result = await cloudinary.uploader.upload(imgs.tempFilePath, {
+      folder: "ecommerce",
+    });
+    imgUrls.push({ img_url: result?.url, pub_id: result?.public_id });
+  }
+  return imgUrls;
 };
